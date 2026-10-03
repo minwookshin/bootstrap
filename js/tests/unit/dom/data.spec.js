@@ -22,6 +22,7 @@ describe('Data', () => {
 
   afterEach(() => {
     Data.remove(div, TEST_KEY)
+    Data.remove(div, UNKNOWN_KEY)
     clearFixture()
   })
 
@@ -89,16 +90,31 @@ describe('Data', () => {
     expect(Data.get(div, TEST_KEY)).toBeNull()
   })
 
-  it('should console.error a message if called with multiple keys', () => {
-    console.error = jasmine.createSpy('console.error')
-
+  it('should store instances under separate keys', () => {
     const data = { ...TEST_DATA }
-    const copy = { ...data }
+    const other = { ...TEST_DATA }
 
     Data.set(div, TEST_KEY, data)
-    Data.set(div, UNKNOWN_KEY, copy)
+    Data.set(div, UNKNOWN_KEY, other)
 
-    expect(console.error).toHaveBeenCalled()
-    expect(Data.get(div, UNKNOWN_KEY)).toBeNull()
+    expect(Data.get(div, TEST_KEY)).toBe(data)
+    expect(Data.get(div, UNKNOWN_KEY)).toBe(other)
+    expect(Data.getAny(div)).toBe(data)
+  })
+
+  it('should keep other instances when one key is removed', () => {
+    const data = { ...TEST_DATA }
+    const other = { ...TEST_DATA }
+
+    Data.set(div, TEST_KEY, data)
+    Data.set(div, UNKNOWN_KEY, other)
+    Data.remove(div, TEST_KEY)
+
+    expect(Data.get(div, TEST_KEY)).toBeNull()
+    expect(Data.get(div, UNKNOWN_KEY)).toBe(other)
+    expect(Data.getAny(div)).toBe(other)
+
+    Data.remove(div, UNKNOWN_KEY)
+    expect(Data.getAny(div)).toBeNull()
   })
 })

@@ -1,4 +1,5 @@
 import Combobox from '../../src/combobox.js'
+import Menu from '../../src/menu.js'
 import EventHandler from '../../src/dom/event-handler.js'
 import { clearFixture, getFixture } from '../helpers/fixture.js'
 
@@ -65,6 +66,22 @@ describe('Combobox', () => {
   })
 
   describe('constructor', () => {
+    it('should reuse its menu instance for repeated keyboard navigation', () => {
+      const error = spyOn(console, 'error')
+      const { toggleEl, items, combobox } = makeCombobox()
+      const menu = Menu.getInstance(toggleEl)
+      expect(menu).not.toBeNull()
+      expect(Combobox.getInstance(toggleEl)).toBe(combobox)
+      combobox.show()
+      keydown(items[0], 'ArrowDown')
+      keydown(items[1], 'ArrowUp')
+      expect(Menu.getInstance(toggleEl)).toBe(menu)
+      expect(error).not.toHaveBeenCalled()
+      combobox.dispose()
+      expect(Menu.getInstance(toggleEl)).toBeNull()
+      expect(Combobox.getInstance(toggleEl)).toBeNull()
+    })
+
     it('should show the placeholder when nothing is selected', () => {
       const { valueEl } = makeCombobox({ placeholder: 'Pick one…' })
 
